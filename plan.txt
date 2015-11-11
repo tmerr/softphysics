@@ -1,6 +1,12 @@
+data:
+simulation object
+    body: static v dynamic v softbody ...
+    material: solid v jello v textured ...
+
+
 collisions:
     find objects that may be colliding using AABBs
-    check if casting a ray from the point in a polygon has even/odd # intersections with faces of the other.
+    check if casting a ray from the point in a polygon has even/odd intersections with faces of the other.
     if even we're outside.
         done
     if odd we're inside:
@@ -16,8 +22,20 @@ collisions:
         done
 
 
-data:
-simulation object
-    body: static v dynamic v softbody ...
-    material: solid v jello v textured ...
+physics functions:
+    first: collision detection
+        broadphase: find pairs of objects with intersecting AABBs.
+        narrowphase: find list of (point and face/point with penetration vector)
+        resolution: calculate collision forces
 
+    second: simulation step
+        do an integration step in the spring-mass system
+            (factor in collision forces and force pushes)
+
+
+rendering functions:
+    render:
+        one material type at a time
+        load shader program
+        dump verts and faces of each object to the gfx card
+        display them
