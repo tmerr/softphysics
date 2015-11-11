@@ -1,0 +1,23 @@
+collisions:
+    find objects that may be colliding using AABBs
+    check if casting a ray from the point in a polygon has even/odd # intersections with faces of the other.
+    if even we're outside.
+        done
+    if odd we're inside:
+        find the fastest way to get out of the shape
+        let's say our point is p
+        for each face:
+            get vectors v1 v2 v3 to each triangle vertex
+            get vector v4 in direction of the normal. (throw it out if p + v4 is outside the triangle)
+            find the vector v with the least magnitude 
+        .5 * force the point toward v
+        .5 * force the thing at v toward the point
+        // if it's a face we lerp the force across its 3 verts
+        done
+
+
+data:
+simulation object
+    body: static v dynamic v softbody ...
+    material: solid v jello v textured ...
+
