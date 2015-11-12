@@ -6,7 +6,7 @@
 
 class Camera {
 public:
-    Camera(glm::vec3 location, float left_right_angle, float up_down_angle);
+    Camera(glm::vec3 location, float dy_rad, float dx_rad);
     void turn(float dy_rad, float dx_rad);
     void forward(float magnitude);
     void strafe(float magnitude);
