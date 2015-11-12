@@ -4,15 +4,15 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(glm::vec3 location, float left_right_angle, float up_down_angle)
+Camera::Camera(glm::vec3 location, float y_rad, float x_rad)
     : location(location),
-      left_right_angle(left_right_angle),
-      up_down_angle(up_down_angle) {
+      y_rad(y_rad),
+      x_rad(x_rad) {
 }
 
-void Camera::turn(float x, float y) {
-    left_right_angle = glm::mod(left_right_angle + x, 2.f * glm::pi<float>());
-    up_down_angle = glm::mod(up_down_angle + y, 2.f * glm::pi<float>());
+void Camera::turn(float dy_rad, float dx_rad) {
+    y_rad = glm::mod(y_rad + dy_rad, 2.f * glm::pi<float>());
+    x_rad = glm::mod(x_rad + dx_rad, 2.f * glm::pi<float>());
 }
 
 void Camera::forward(float displacement) {
@@ -29,7 +29,7 @@ glm::vec3 Camera::getLocation() {
 
 glm::vec3 Camera::getFacingVector() {
     static const glm::vec3 negunitz(0.f, 0.f, -1.f);
-    return glm::rotateX(glm::rotateY(negunitz, left_right_angle), up_down_angle);
+    return glm::rotateX(glm::rotateY(negunitz, y_rad), x_rad);
 }
 
 glm::mat4 Camera::getWorldToClip() {

@@ -7,7 +7,7 @@
 class Camera {
 public:
     Camera(glm::vec3 location, float left_right_angle, float up_down_angle);
-    void turn(float left_right_rad, float up_down_rad);
+    void turn(float dy_rad, float dx_rad);
     void forward(float magnitude);
     void strafe(float magnitude);
     glm::vec3 getLocation();
@@ -15,8 +15,8 @@ public:
     glm::mat4x4 getWorldToClip();
 
 private:
-    float left_right_angle;
-    float up_down_angle;
+    float y_rad;
+    float x_rad;
     glm::vec3 location;
     const float turn_rate = 1.f;
     const float move_rate = 1.f;
