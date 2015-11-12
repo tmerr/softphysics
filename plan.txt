@@ -39,3 +39,6 @@ rendering functions:
         load shader program
         dump verts and faces of each object to the gfx card
         display them
+
+    jello fragment shader:
+        mostly need refraction and specular highlights.
