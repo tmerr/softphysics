@@ -20,7 +20,7 @@ private:
     glm::vec3 location;
     const float turn_rate = 1.f;
     const float move_rate = 1.f;
-    const float fov_deg = 0.61f; // 35 degrees
+    const float fov_rad = 0.61f; // 35 degrees
     const float near = 0.1f;
     const float far = 1000.f;
 };

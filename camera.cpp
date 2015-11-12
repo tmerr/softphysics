@@ -33,7 +33,7 @@ glm::vec3 Camera::getFacingVector() {
 }
 
 glm::mat4 Camera::getWorldToClip() {
-    auto proj = glm::perspective(fov_deg, 1.f, near, far);
+    auto proj = glm::perspective(fov_rad, 1.f, near, far);
     auto viewtrans = glm::lookAt(location,
                                  location + getFacingVector(),
                                  glm::vec3(0.f, 1.f, 0.f));
