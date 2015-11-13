@@ -8,6 +8,7 @@
 
 class Renderer {
 public:
+    Renderer(int width, int height);
     ~Renderer();
     void init();
     void windowChanged(int width, int height);

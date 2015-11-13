@@ -11,6 +11,8 @@
 // 2. It is told about input events.
 class Scene {
 public:
+    Scene(int width, int height);
+
     // when the forward key is pressed.
     void forwardPressed();
 
@@ -36,16 +38,16 @@ public:
     void rightReleased();
 
     // when the mouse moved.
-    void mouseMoved(int dx, int dy);
+    void mouseMoved(float dx, float dy);
 
     // when there's a change in window size.
     void windowChanged(int width, int height);
 
-    // whether to fix time steps or vary with framerate.
-    void setFixedStep(bool value);
-
     // take a step in the simulation and rendering.
     void step(float dt);
+
+    // take a step in the simulation and rendering, with the fixed step size as dt.
+    void fixedStep();
 private:
     std::vector<SimObject> simobjects;
     Camera camera;
@@ -57,7 +59,6 @@ private:
     bool leftdown = false;
     bool rightdown = false;
 
-    bool fixedstep = true;
     const float dtfixed = 1.f/60.f;
     const float move_speed = 2.f; // meters per second
     const float mouse_sensitivity = 0.02f; // radians per pixel

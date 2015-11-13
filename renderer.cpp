@@ -9,6 +9,10 @@
 #include <GL/glut.h>
 #include <glm/mat4x4.hpp>
 
+Renderer::Renderer(int width, int height) {
+    glViewport(0.f, 0.f, (float)width, (float)height);
+}
+
 class ShaderError : public std::exception
 {
   virtual const char* what() const throw()

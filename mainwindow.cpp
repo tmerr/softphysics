@@ -1,0 +1,110 @@
+#include "mainwindow.hpp"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <iostream>
+#include <exception>
+
+class WindowCreationError : public std::runtime_error {
+public:
+    WindowCreationError(const std::string& msg) 
+        : std::runtime_error(msg)
+    { }
+};
+
+static void error_callback(int error, const char* description) {
+    std::cerr << description;
+}
+
+void MainWindow::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    MainWindow *win = static_cast<MainWindow*>(glfwGetWindowUserPointer(window));
+
+    switch (key) {
+        case GLFW_KEY_ESCAPE:
+            if (action == GLFW_PRESS) {
+                glfwSetWindowShouldClose(window, GL_TRUE);
+            }
+            break;
+        case GLFW_KEY_W:
+            if (action == GLFW_PRESS) {
+                win->scene.forwardPressed();
+            } else if (action == GLFW_RELEASE) {
+                win->scene.forwardReleased();
+            }
+            break;
+        case GLFW_KEY_A:
+            if (action == GLFW_PRESS) {
+                win->scene.leftPressed();
+            } else if (action == GLFW_RELEASE) {
+                win->scene.leftReleased();
+            }
+            break;
+        case GLFW_KEY_S:
+            if (action == GLFW_PRESS) {
+                win->scene.backPressed();
+            } else if (action == GLFW_RELEASE) {
+                win->scene.backReleased();
+            }
+            break;
+        case GLFW_KEY_D:
+            if (action == GLFW_PRESS) {
+                win->scene.rightPressed();
+            } else if (action == GLFW_RELEASE) {
+                win->scene.rightReleased();
+            }
+            break;
+    }
+}
+
+void MainWindow::mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+    MainWindow *win = static_cast<MainWindow*>(glfwGetWindowUserPointer(window));
+    win->scene.mouseMoved((float)xpos, (float)ypos);
+}
+
+void MainWindow::resizeCallback(GLFWwindow* window, int width, int height) {
+    MainWindow *win = static_cast<MainWindow*>(glfwGetWindowUserPointer(window));
+    win->scene.windowChanged(width, height);
+}
+
+MainWindow::MainWindow(int width, int height, const char* title)
+    : scene(width, height) {
+
+    glfwSetErrorCallback(error_callback);
+
+    if (!glfwInit()) {
+        throw WindowCreationError("glfwInit failed");
+    }
+    window = glfwCreateWindow(width, height, title, NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        throw WindowCreationError("glfwCreateWindow failed");
+    }
+
+    glfwMakeContextCurrent(window);
+
+    GLenum is_ok = glewInit();
+    if (is_ok != GLEW_OK) {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        throw WindowCreationError("glewInit failed");
+    }
+
+    glfwSetWindowUserPointer(window, this);
+    glfwSetFramebufferSizeCallback(window, resizeCallback);
+    glfwSetKeyCallback(window, keyCallback);
+    glfwSetCursorPosCallback(window, mouseCallback);
+
+    glfwSwapInterval(1); // vsync
+}
+
+void MainWindow::mainLoop() {
+    while (!glfwWindowShouldClose(window)) {
+        scene.fixedStep();
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
+// need to glfwTerminate and glfwDestroyWindow at the end here.
