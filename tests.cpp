@@ -101,7 +101,7 @@ void error_callback(int error, const char* description)
     exit(EXIT_FAILURE);
 }
 
-BOOST_AUTO_TEST_CASE(renderer_construct_destruct) {
+BOOST_AUTO_TEST_CASE(renderer_init) {
     BOOST_CHECK(glfwInit());
     glfwSetErrorCallback(error_callback);
     GLFWwindow* window = glfwCreateWindow(640, 480, "TestWindow", NULL, NULL);
