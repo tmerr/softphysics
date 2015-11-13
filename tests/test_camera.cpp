@@ -1,38 +1,6 @@
-#include "boundingbox.hpp"
 #include "camera.hpp"
-#include "renderer.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <vector>
-#include <iostream>
-
-#define BOOST_TEST_MODULE MyTests
-#include <boost/test/included/unit_test.hpp>
-
-
-BOOST_AUTO_TEST_CASE(boundingbox_contents) {
-    std::vector<glm::vec3> points;
-    points.push_back(glm::vec3(-10.f, -20.f, 10.f));
-    points.push_back(glm::vec3(30.f, 40.f, 0.f));
-    BoundingBox bb = BoundingBox::ofPoints(points);
-    BOOST_CHECK_EQUAL(bb.p0.x, -10.f);
-    BOOST_CHECK_EQUAL(bb.p0.y, -20.f);
-    BOOST_CHECK_EQUAL(bb.p0.z, 0.f);
-    BOOST_CHECK_EQUAL(bb.p1.x, 30.f);
-    BOOST_CHECK_EQUAL(bb.p1.y, 40.f);
-    BOOST_CHECK_EQUAL(bb.p1.z, 10.f);
-}
-
-BOOST_AUTO_TEST_CASE(boundingbox_contains) {
-    std::vector<glm::vec3> points;
-    points.push_back(glm::vec3(-10.f, -20.f, 10.f));
-    points.push_back(glm::vec3(30.f, 40.f, 0.f));
-    BoundingBox bb = BoundingBox::ofPoints(points);
-    BOOST_CHECK(bb.contains(glm::vec3(0.f, 0.f, 0.5f)));
-    BOOST_CHECK(!bb.contains(glm::vec3(0.f, 0.f, -1.f)));
-}
 
 static const float epsilon = 0.000001f;
 
@@ -93,26 +61,4 @@ BOOST_AUTO_TEST_CASE(camera_worldtoclip2) {
     BOOST_CHECK(notinclip.y < -1.f);
     BOOST_CHECK(-1.f < notinclip.z && notinclip.z < 1.f);
     BOOST_CHECK(approxEqual(notinclip.w, 1.f));
-}
-
-void error_callback(int error, const char* description)
-{
-    std::cerr << "error: " << description;
-    exit(EXIT_FAILURE);
-}
-
-BOOST_AUTO_TEST_CASE(renderer_init) {
-    BOOST_CHECK(glfwInit());
-    glfwSetErrorCallback(error_callback);
-    GLFWwindow* window = glfwCreateWindow(640, 480, "TestWindow", NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-    glfwMakeContextCurrent(window);
-    BOOST_CHECK_EQUAL(glewInit(), GLEW_OK); // important
-    Renderer renderer;
-    BOOST_CHECK_NO_THROW(renderer.init());
-    glfwDestroyWindow(window);
-    glfwTerminate();
 }
