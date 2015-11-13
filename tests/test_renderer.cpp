@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(renderer_init) {
     }
     glfwMakeContextCurrent(window);
     BOOST_CHECK_EQUAL(glewInit(), GLEW_OK); // important
-    Renderer renderer;
+    Renderer renderer(640, 680);
     BOOST_CHECK_NO_THROW(renderer.init());
     glfwDestroyWindow(window);
     glfwTerminate();

@@ -22,16 +22,16 @@ class ShaderError : public std::exception
 } shader_error;
 
 GLuint compileShader(std::string path, GLenum shader_type) {
-    const char* src;
+    std::string ts;
     try {
         std::ifstream t(path);
-        std::string ts((std::istreambuf_iterator<char>(t)),
-                        std::istreambuf_iterator<char>());
-        src = ts.c_str();
+        ts = std::string((std::istreambuf_iterator<char>(t)),
+                          std::istreambuf_iterator<char>());
     } catch(std::ifstream::failure e) {
         std::cerr << e.what() << std::endl;
         throw shader_error;
     }
+    const char* src = ts.c_str();
 
     GLuint shader = glCreateShader(shader_type);
     glShaderSourceARB(shader, 1, &src, NULL);
