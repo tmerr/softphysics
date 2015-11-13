@@ -6,7 +6,8 @@
 
 class Camera {
 public:
-    Camera(glm::vec3 location, float dy_rad, float dx_rad);
+    Camera(glm::vec3 location, float dy_rad, float dx_rad, float aspect);
+    void setAspect(float aspect);
     void turn(float dy_rad, float dx_rad);
     void forward(float magnitude);
     void strafe(float magnitude);
@@ -18,6 +19,7 @@ private:
     float y_rad;
     float x_rad;
     glm::vec3 location;
+    float aspect;
     const float turn_rate = 1.f;
     const float move_rate = 1.f;
     const float fov_rad = 0.61f; // 35 degrees

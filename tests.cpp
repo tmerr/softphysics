@@ -1,8 +1,12 @@
 #include "boundingbox.hpp"
 #include "camera.hpp"
-#include <vector>
+#include "renderer.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <vector>
+#include <iostream>
 
 #define BOOST_TEST_MODULE MyTests
 #include <boost/test/included/unit_test.hpp>
@@ -47,30 +51,30 @@ bool approxEqual(const glm::vec4 &v1, const glm::vec4 &v2) {
 }
 
 BOOST_AUTO_TEST_CASE(camera_faces_negz) {
-    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f);
+    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f, 1.f);
     BOOST_CHECK(approxEqual(c.getFacingVector(), glm::vec3(0.f, 0.f, -1.f)));
 }
 
 BOOST_AUTO_TEST_CASE(camera_forward) {
-    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f);
+    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f, 1.f);
     c.forward(2.f);
     BOOST_CHECK(approxEqual(c.getLocation(), glm::vec3(0.f, 0.f, -2.f)));
 }
 
 BOOST_AUTO_TEST_CASE(camera_strafe) {
-    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f);
+    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f, 1.f);
     c.strafe(2.f);
     BOOST_CHECK(approxEqual(c.getLocation(), glm::vec3(2.f, 0.f, 0.f)));
 }
 
 BOOST_AUTO_TEST_CASE(camera_rotate) {
-    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f);
+    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f, 1.f);
     c.turn(glm::half_pi<float>(), 0.f);
     BOOST_CHECK(approxEqual(c.getFacingVector(), glm::vec3(-1.f, 0.f, 0.f)));
 }
 
 BOOST_AUTO_TEST_CASE(camera_worldtoclip1) {
-    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f);
+    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f, 1.f);
     glm::mat4 w2c = c.getWorldToClip();
     glm::vec4 inclip = w2c * glm::vec4(0.f, 0.f, -10.f, 1.f);
     inclip /= inclip.w; // perspective divide to go from clip space to ndc
@@ -81,7 +85,7 @@ BOOST_AUTO_TEST_CASE(camera_worldtoclip1) {
 }
 
 BOOST_AUTO_TEST_CASE(camera_worldtoclip2) {
-    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f);
+    Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f, 1.f);
     glm::mat4 w2c = c.getWorldToClip();
     glm::vec4 notinclip = w2c * glm::vec4(glm::vec3(0.f, -50.f, -2.f), 1.f);
     notinclip /= notinclip.w; //perspective divide to go from clip space to ndc
@@ -89,4 +93,26 @@ BOOST_AUTO_TEST_CASE(camera_worldtoclip2) {
     BOOST_CHECK(notinclip.y < -1.f);
     BOOST_CHECK(-1.f < notinclip.z && notinclip.z < 1.f);
     BOOST_CHECK(approxEqual(notinclip.w, 1.f));
+}
+
+void error_callback(int error, const char* description)
+{
+    std::cerr << "error: " << description;
+    exit(EXIT_FAILURE);
+}
+
+BOOST_AUTO_TEST_CASE(renderer_construct_destruct) {
+    BOOST_CHECK(glfwInit());
+    glfwSetErrorCallback(error_callback);
+    GLFWwindow* window = glfwCreateWindow(640, 480, "TestWindow", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
+    glfwMakeContextCurrent(window);
+    BOOST_CHECK_EQUAL(glewInit(), GLEW_OK); // important
+    Renderer renderer;
+    BOOST_CHECK_NO_THROW(renderer.init());
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }

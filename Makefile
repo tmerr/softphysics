@@ -1,8 +1,10 @@
-all:
-	$(CXX) -std=c++14 boundingbox.cpp camera.cpp renderer.cpp main.cpp -o program.out -lglut -lGL -lm -lGLEW -DGL_GLEXT_PROTOTYPES
+cpps = boundingbox.cpp camera.cpp renderer.cpp
+glstuff = -lGL -lGLEW -DGL_GLEXT_PROTOTYPES -lglfw
 
+all:
+	$(CXX) -std=c++14 $(cpps) main.cpp -o program.out $(glstuff)
 test:
-	$(CXX) -std=c++14 boundingbox.cpp camera.cpp renderer.cpp tests.cpp -o test.out -lglut -lGL -lm -lGLEW -DGL_GLEXT_PROTOTYPES
+	$(CXX) -std=c++14 -g $(cpps) tests.cpp -o test.out $(glstuff)
 
 clean:
 	rm program.out test.out

@@ -4,10 +4,15 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(glm::vec3 location, float y_rad, float x_rad)
+Camera::Camera(glm::vec3 location, float y_rad, float x_rad, float aspect)
     : location(location),
       y_rad(y_rad),
-      x_rad(x_rad) {
+      x_rad(x_rad),
+      aspect(aspect) {
+}
+
+void Camera::setAspect(float asp) {
+    aspect = asp;
 }
 
 void Camera::turn(float dy_rad, float dx_rad) {
@@ -33,7 +38,7 @@ glm::vec3 Camera::getFacingVector() {
 }
 
 glm::mat4 Camera::getWorldToClip() {
-    auto proj = glm::perspective(fov_rad, 1.f, near, far);
+    auto proj = glm::perspective(fov_rad, aspect, near, far);
     auto viewtrans = glm::lookAt(location,
                                  location + getFacingVector(),
                                  glm::vec3(0.f, 1.f, 0.f));
