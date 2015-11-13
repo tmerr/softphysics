@@ -1,4 +1,4 @@
-cpps = boundingbox.cpp camera.cpp renderer.cpp
+cpps = boundingbox.cpp camera.cpp physics.cpp renderer.cpp scene.cpp
 glstuff = -lGL -lGLEW -DGL_GLEXT_PROTOTYPES -lglfw
 
 all:

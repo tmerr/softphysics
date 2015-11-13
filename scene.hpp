@@ -1,6 +1,9 @@
 #ifndef SCENE_HPP_INCLUDED
 #define SCENE_HPP_INCLUDED
 
+#include "camera.hpp"
+#include "physics.hpp"
+#include "renderer.hpp"
 #include <vector>
 
 // The scene in principle doesn't care whether we're using glfw / glut. It requires
@@ -55,9 +58,9 @@ private:
     bool rightdown = false;
 
     bool fixedstep = true;
-    static const dtfixed = 1.f/60.f;
-    static float move_speed = 2.f; // meters per second
-    static float mouse_sensitivity = 0.02f; // radians per pixel
-}
+    const float dtfixed = 1.f/60.f;
+    const float move_speed = 2.f; // meters per second
+    const float mouse_sensitivity = 0.02f; // radians per pixel
+};
 
 #endif

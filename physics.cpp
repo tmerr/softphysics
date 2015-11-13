@@ -1,6 +1,7 @@
+#include "physics.hpp"
 #include <glm/vec3.hpp>
 #include <cstddef>
-#include <array>
+#include <vector>
 
 // applied to a point on the body
 struct PointForce {
@@ -10,9 +11,10 @@ struct PointForce {
 
 // applied to all points on the body within the volume
 struct CylinderForce {
-    glm::vec3 bottom;
-    glm::vec3 totop;
+    glm::vec3 start;
+    glm::vec3 end;
     float radius;
 };
 
-
+void Physics::step(std::vector<SimObject> &simobjects, float dt) {
+}

@@ -1,3 +1,5 @@
+#include "scene.hpp"
+
 void Scene::forwardPressed() { forwarddown = true; }
 void Scene::forwardReleased() { forwarddown = false; }
 void Scene::backPressed() { backdown = true; }
@@ -17,7 +19,7 @@ void Scene::windowChanged(int width, int height) {
     renderer.windowChanged(width, height);
 }
 
-void setFixedStep(bool value) {
+void Scene::setFixedStep(bool value) {
     fixedstep = value;
 }
 
