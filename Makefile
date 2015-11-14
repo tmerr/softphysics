@@ -1,5 +1,5 @@
 cpps = boundingbox.cpp camera.cpp physics.cpp renderer.cpp scene.cpp mainwindow.cpp
-glstuff = -lGL -lGLEW -DGL_GLEXT_PROTOTYPES -lglfw
+glstuff = -lGL -lGLEW -lglfw
 
 all:
 	$(CXX) -std=c++14 $(cpps) main.cpp -o program.out $(glstuff)

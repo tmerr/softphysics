@@ -1,9 +1,13 @@
 #include "scene.hpp"
 #include <glm/vec3.hpp>
 
-Scene::Scene(int width, int height)
-    : camera(glm::vec3(0.f), 0.f, 0.f, (float)width/(float)height),
-      renderer(width, height) {
+Scene::Scene()
+    : camera(glm::vec3(0.f), 0.f, 0.f, 1.f) {
+}
+
+void Scene::init(int width, int height) {
+    camera.setAspect((float)width/(float)height);
+    renderer.init(width, height);
 }
 
 void Scene::forwardPressed() { forwarddown = true; }

@@ -11,7 +11,9 @@
 // 2. It is told about input events.
 class Scene {
 public:
-    Scene(int width, int height);
+    Scene();
+
+    void init(int width, int height);
 
     // when the forward key is pressed.
     void forwardPressed();

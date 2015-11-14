@@ -3,14 +3,13 @@
 
 #include "simobject.hpp"
 #include <glm/mat4x4.hpp>
-#include <GL/glew.h>
 #include <vector>
+#include <GL/glew.h>
 
 class Renderer {
 public:
-    Renderer(int width, int height);
     ~Renderer();
-    void init();
+    void init(int width, int height);
     void windowChanged(int width, int height);
     void render(const std::vector<SimObject> &objects, glm::mat4 worldtoclip);
 private:

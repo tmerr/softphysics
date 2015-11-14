@@ -2,6 +2,7 @@
 #define WINDOW_HPP_INCLUDED
 
 #include "scene.hpp"
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 class MainWindow {

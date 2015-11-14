@@ -12,7 +12,7 @@
 
 struct StaticBody {
     std::vector<glm::vec3> points;
-    std::vector<std::array<std::size_t, 3> > faces;
+    std::vector<std::array<unsigned int, 3> > faces;
     BoundingBox boundingbox;
 };
 
@@ -28,7 +28,7 @@ struct SoftBody {
     std::vector<glm::vec3> points_backbuffer;
     std::vector<glm::vec3> velocities;
     std::vector<glm::vec3> velocities_backbuffer;
-    std::vector<std::array<std::size_t, 3> > faces;
+    std::vector<std::array<unsigned int, 3> > faces;
     std::vector<Spring> springs;
 };
 
