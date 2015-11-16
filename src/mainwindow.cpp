@@ -72,7 +72,14 @@ void MainWindow::keyCallback(GLFWwindow* window, int key, int scancode, int acti
 
 void MainWindow::mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     MainWindow *win = static_cast<MainWindow*>(glfwGetWindowUserPointer(window));
-    win->scene.mouseMoved((float)xpos, (float)ypos);
+    if (win->mouse_havelast) {
+        float deltax = (float)(xpos - win->mouse_lastx);
+        float deltay = (float)(ypos - win->mouse_lasty);
+        win->scene.mouseMoved(deltax, deltay);
+    }
+    win->mouse_lastx = xpos;
+    win->mouse_lasty = ypos;
+    win->mouse_havelast = true;
 }
 
 void MainWindow::resizeCallback(GLFWwindow* window, int width, int height) {

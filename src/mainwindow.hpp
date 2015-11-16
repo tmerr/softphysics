@@ -15,6 +15,9 @@ private:
     static void resizeCallback(GLFWwindow* window, int width, int height);
     Scene scene;
     GLFWwindow* window;
+    bool mouse_havelast = false;
+    double mouse_lastx;
+    double mouse_lasty;
 };
 
 #endif
