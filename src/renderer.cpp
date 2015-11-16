@@ -130,8 +130,10 @@ public:
 
 class DrawIfSolid: public boost::static_visitor<> {
 public:
-    DrawIfSolid(DrawData data) : data(data) { }
+    DrawIfSolid(DrawData data, GLint col_uniform) : data(data), color_uniform(col_uniform) { }
     void operator()(const SolidMaterial &solid) const {
+        glUniform3fv(color_uniform, 1, glm::value_ptr(solid.color));
+
         GLuint vbo;
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -160,6 +162,7 @@ public:
     void operator()(const ANY &so) const { }
 private:
     DrawData data;
+    GLint color_uniform;
 };
 
 void Renderer::render(const std::vector<SimObject> &objects, glm::mat4 worldtoclip) {
@@ -169,18 +172,25 @@ void Renderer::render(const std::vector<SimObject> &objects, glm::mat4 worldtocl
     // use the solid program
     glUseProgram(solid_program);
 
-    // set the uniforms
-    GLint location = glGetUniformLocation(solid_program, "worldtoclip");
-    if (location == -1) {
+    // set the world to clip matrix uniform
+    GLint matrix_uniform = glGetUniformLocation(solid_program, "worldtoclip");
+    if (matrix_uniform == -1) {
         std::cerr << "couldn't find uniform variable worldtoclip" << std::endl;
         throw shader_error;
     }
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(worldtoclip));
+    glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, glm::value_ptr(worldtoclip));
+
+    // get the color uniform that will be changed with each simulation object
+    GLint color_uniform = glGetUniformLocation(solid_program, "input_color");
+    if (color_uniform == -1) {
+        std::cerr << "couldn't find uniform variable input_color" << std::endl;
+        throw shader_error;
+    }
 
     // make + draw buffers
     for (const SimObject &obj : objects) {
         DrawData draw_data = boost::apply_visitor(DataGrabber(), obj.body);
-        DrawIfSolid drawIfSolid(draw_data);
+        DrawIfSolid drawIfSolid(draw_data, color_uniform);
         boost::apply_visitor(drawIfSolid, obj.material);
     }
 }
