@@ -1,6 +1,4 @@
 #include "mainwindow.hpp"
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <iostream>
 #include <exception>
 
@@ -10,6 +8,23 @@ public:
         : std::runtime_error(msg)
     { }
 };
+
+#ifdef DEBUG_GL
+void debugCallbackGL(GLenum source, GLenum type, GLuint id, GLenum severity,
+                     GLsizei length, const GLchar* message, const void* userParam) {
+    std::cerr << "OpenGL debug message:" << std::endl
+              << "    source: " << source << std::endl
+              << "    type: " << type << std::endl
+              << "    id: " << id << std::endl
+              << "    severity: " << severity << std::endl
+              << "    message: " << message << std::endl
+              << std::endl;
+
+    if (severity == GL_DEBUG_SEVERITY_HIGH) {
+        throw std::runtime_error("Error: high severity gl error in debug mode");
+    }
+}
+#endif
 
 static void error_callback(int error, const char* description) {
     std::cerr << description;
@@ -72,38 +87,53 @@ MainWindow::MainWindow(int width, int height, const char* title) {
     }
 
     glfwSetErrorCallback(error_callback);
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-
     window = glfwCreateWindow(width, height, title, NULL, NULL);
     if (!window) {
         glfwTerminate();
         throw WindowCreationError("glfwCreateWindow failed");
     }
-
     glfwMakeContextCurrent(window);
 
-    if (glewInit() != GLEW_OK) {
+    // Load GL and check for errors
+    if (!gladLoadGL()) {
         glfwDestroyWindow(window);
         glfwTerminate();
-        throw WindowCreationError("glewInit failed");
+        throw WindowCreationError("gladLoadGL failed");
     }
-
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-    std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+    std::cout << "OpenGL info:" << std::endl
+              << "    OpenGL version: " << glGetString(GL_VERSION) << std::endl
+              << "    GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl
+              << "    Vendor: " << glGetString(GL_VENDOR) << std::endl
+              << "    Renderer: " << glGetString(GL_RENDERER) << std::endl
+              << std::endl;
+    if (GLVersion.major < 3 || (GLVersion.major == 3 && GLVersion.minor < 3)) {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        throw WindowCreationError("Error: expected minimum OpenGL version 3.3");
+    }
+#ifdef DEBUG_GL
+    bool guaranteedDebug = GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 3);
+    if (!(guaranteedDebug || GLAD_GL_KHR_debug)) {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+        throw WindowCreationError("Error: debug callbacks require GL 4.3 or GL_KHR_debug extension");
+    }
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(debugCallbackGL, NULL);
+#endif
 
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, resizeCallback);
     glfwSetKeyCallback(window, keyCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
 
-    glfwSwapInterval(1); // enable vsync
+    glfwSwapInterval(1); // enables vsync
 }
 
 void MainWindow::mainLoop() {
@@ -113,9 +143,9 @@ void MainWindow::mainLoop() {
     scene.init(width, height);
 
     while (!glfwWindowShouldClose(window)) {
-        //scene.fixedStep();
         glfwSwapBuffers(window);
         glfwPollEvents();
+        scene.fixedStep();
     }
 
     glfwDestroyWindow(window);

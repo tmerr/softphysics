@@ -1,0 +1,6 @@
+uniform mat4 worldtoclip;
+
+void main()
+{
+    gl_Position = worldtoclip * gl_Vertex;
+}

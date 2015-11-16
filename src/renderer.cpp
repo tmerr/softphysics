@@ -2,7 +2,6 @@
 #include "simobject.hpp"
 
 #include <glm/mat4x4.hpp>
-#include <GL/glew.h>
 
 #include <boost/variant.hpp>
 #include <string>
@@ -18,37 +17,42 @@ class ShaderError : public std::exception {
 } shader_error;
 
 GLuint compileShader(std::string path, GLenum shader_type) {
-    std::string ts;
+    // read in the shader source code
+    std::string source_string;
     try {
-        std::ifstream t(path);
-        ts = std::string((std::istreambuf_iterator<char>(t)),
-                          std::istreambuf_iterator<char>());
+        std::ifstream file(path);
+        source_string = std::string((std::istreambuf_iterator<char>(file)),
+                                     std::istreambuf_iterator<char>());
     } catch(std::ifstream::failure e) {
         std::cerr << e.what() << std::endl;
         throw shader_error;
     }
-    const char* src = ts.c_str();
 
+    // create and compile the shader
+    const char* source = source_string.c_str();
+    int length = source_string.size();
     GLuint shader = glCreateShader(shader_type);
     if (shader == 0) {
         std::cerr << "failed to create shader";
         throw shader_error;
     }
-    glShaderSource(shader, 1, &src, NULL);
+    glShaderSource(shader, 1, &source, &length);
     glCompileShader(shader);
 
-    GLint is_compiled;
-    glGetProgramiv(shader, GL_COMPILE_STATUS, &is_compiled);
-    if (is_compiled == GL_FALSE) {
+    // check the compile status
+    GLint status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+
+    if (status == GL_FALSE) {
         GLint loglength;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &loglength);
 
         std::cerr << "failed to compile shader at \"" << path << "\"." << std::endl;
 
         if (loglength > 1) {
-            std::vector<GLchar> log(loglength, 0);
-            glGetShaderInfoLog(shader, loglength, nullptr, &log[0]);
-            std::cerr << "info log: " << std::string(log.begin(), log.end()) << std::endl;
+            std::vector<GLchar> log(loglength);
+            glGetShaderInfoLog(shader, loglength, &loglength, &log[0]);
+            std::cerr << "info log: " << &log[0] << std::endl;
         }
 
         glDeleteShader(shader);
@@ -72,9 +76,9 @@ GLuint compileSolidShader() {
     glAttachShader(program, vert);
     glAttachShader(program, frag);
     glLinkProgram(program);
-    GLint is_linked;
-    glGetProgramiv(program, GL_LINK_STATUS, &is_linked);
-    if(is_linked == GL_FALSE)
+    GLint status;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if(status == GL_FALSE)
     {
         GLint loglength;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &loglength);
@@ -85,7 +89,6 @@ GLuint compileSolidShader() {
             std::cerr << ch;
         }
         std::cerr << std::endl;
-        // don't leak
         glDeleteProgram(program);
         glDeleteShader(vert);
         glDeleteShader(frag);
@@ -98,38 +101,8 @@ GLuint compileSolidShader() {
     return program;
 }
 
-void Renderer::init(int width, int height) {
-    switch (glGetError()) {
-        case GL_NO_ERROR:
-            std::cout << "no error" << std::endl;
-            break;
-        case GL_INVALID_ENUM:
-            std::cout << "invalid enum" << std::endl;
-            break;
-        case GL_INVALID_VALUE:
-            std::cout << "invalid value" << std::endl;
-            break;
-        case GL_INVALID_OPERATION:
-            std::cout << "invalid operation" << std::endl;
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            std::cout << "invalid framebuffer operation" << std::endl;
-            break;
-        case GL_OUT_OF_MEMORY:
-            std::cout << "out of memory" << std::endl;
-            break;
-        case GL_STACK_UNDERFLOW:
-            std::cout << "stack underflow" << std::endl;
-            break;
-        case GL_STACK_OVERFLOW:
-            std::cout << "stack overflow" << std::endl;
-            break;
-        default:
-            std::cout << "i don't know this error" << std::endl;
-            break;
-    }
 
-    std::cout << "gl version string: " << glGetString(GL_VERSION) << std::endl;
+void Renderer::init(int width, int height) {
     glViewport(0.f, 0.f, (float)width, (float)height);
     solid_program = compileSolidShader();
 }
@@ -158,21 +131,21 @@ public:
     DrawIfSolid(DrawData data) : data(data) { }
     void operator()(const SolidMaterial &solid) const {
         GLuint vbo;
-        GLuint ibo;
-
         glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ibo);
-
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-
         GLsizeiptr vbo_sz = data.points.size() * sizeof(glm::vec3);
-        GLsizeiptr ibo_sz = data.faces.size() * sizeof(unsigned int) * 3;
-
         glBufferData(GL_ARRAY_BUFFER, vbo_sz, &data.points[0], GL_STREAM_DRAW);
+
+        GLuint ibo;
+        glGenBuffers(1, &ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        GLsizeiptr ibo_sz = data.faces.size() * sizeof(unsigned int) * 3;
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_sz, &data.faces[0], GL_STREAM_DRAW);
 
-        glDrawElements(GL_TRIANGLES, data.faces.size(), GL_UNSIGNED_INT, NULL);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+        glDrawElements(GL_TRIANGLES, data.faces.size(), GL_UNSIGNED_INT, 0);
 
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ibo);
@@ -184,14 +157,21 @@ private:
 };
 
 void Renderer::render(const std::vector<SimObject> &objects, glm::mat4 worldtoclip) {
-    // draw all objects with solid materials
+    glClearColor(0.2, 0.2, 0.4, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // use the solid program
     glUseProgram(solid_program);
+
+    // set the uniforms
     GLint location = glGetUniformLocation(solid_program, "worldtoclip");
     if (location == -1) {
         std::cerr << "couldn't find uniform variable worldtoclip" << std::endl;
         throw shader_error;
     }
     glUniformMatrix4fv(location, 1, GL_FALSE, &worldtoclip[0][0]);
+
+    // make + draw buffers
     for (const SimObject &obj : objects) {
         DrawData draw_data = boost::apply_visitor(DataGrabber(), obj.body);
         DrawIfSolid drawIfSolid(draw_data);

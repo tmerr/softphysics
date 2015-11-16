@@ -4,7 +4,7 @@
 #include "simobject.hpp"
 #include <glm/mat4x4.hpp>
 #include <vector>
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 class Renderer {
 public:

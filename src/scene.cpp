@@ -1,8 +1,23 @@
 #include "scene.hpp"
 #include <glm/vec3.hpp>
 
-Scene::Scene()
-    : camera(glm::vec3(0.f), 0.f, 0.f, 1.f) {
+Scene::Scene() : camera(glm::vec3(0.f), 0.f, 0.f, 1.f) {
+    // triangle body
+    StaticBody body;
+    body.points.push_back(glm::vec3(-1.f, -0.5f, -3.f));
+    body.points.push_back(glm::vec3(1.f, -0.5f, -3.f));
+    body.points.push_back(glm::vec3(0.f, 0.5f, -3.f));
+    std::array<unsigned int, 3> face1 = {{ 0, 1, 2 }};
+    std::array<unsigned int, 3> face2 = {{ 2, 1, 0 }};
+    body.faces.push_back(face1);
+    body.faces.push_back(face2);
+
+    // triangle material
+    SolidMaterial material = { glm::vec3(0.f, 0.f, 1.f) };
+
+    // triangle final object
+    SimObject simobject = { body, material };
+    simobjects.push_back(simobject);
 }
 
 void Scene::init(int width, int height) {
