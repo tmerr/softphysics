@@ -142,13 +142,16 @@ public:
         GLsizeiptr ibo_sz = data.faces.size() * sizeof(unsigned int) * 3;
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_sz, &data.faces[0], GL_STREAM_DRAW);
 
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
         glDrawElements(GL_TRIANGLES, data.faces.size(), GL_UNSIGNED_INT, 0);
 
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ibo);
+        glDeleteVertexArrays(1, &vao);
     }
     template<typename ANY>
     void operator()(const ANY &so) const { }
