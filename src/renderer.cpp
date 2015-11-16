@@ -2,6 +2,8 @@
 #include "simobject.hpp"
 
 #include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <boost/variant.hpp>
 #include <string>
@@ -134,20 +136,21 @@ public:
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         GLsizeiptr vbo_sz = data.points.size() * sizeof(glm::vec3);
-        glBufferData(GL_ARRAY_BUFFER, vbo_sz, &data.points[0], GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vbo_sz, glm::value_ptr(data.points[0]), GL_STREAM_DRAW);
+
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
 
         GLuint ibo;
         glGenBuffers(1, &ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         GLsizeiptr ibo_sz = data.faces.size() * sizeof(unsigned int) * 3;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_sz, &data.faces[0], GL_STREAM_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_sz, &data.faces[0][0], GL_STREAM_DRAW);
 
-        GLuint vao;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        glDrawElements(GL_TRIANGLES, data.faces.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, data.faces.size() * 3, GL_UNSIGNED_INT, 0);
 
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ibo);
@@ -160,8 +163,8 @@ private:
 };
 
 void Renderer::render(const std::vector<SimObject> &objects, glm::mat4 worldtoclip) {
-    glClearColor(0.2, 0.2, 0.4, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // use the solid program
     glUseProgram(solid_program);
@@ -172,7 +175,7 @@ void Renderer::render(const std::vector<SimObject> &objects, glm::mat4 worldtocl
         std::cerr << "couldn't find uniform variable worldtoclip" << std::endl;
         throw shader_error;
     }
-    glUniformMatrix4fv(location, 1, GL_FALSE, &worldtoclip[0][0]);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(worldtoclip));
 
     // make + draw buffers
     for (const SimObject &obj : objects) {
