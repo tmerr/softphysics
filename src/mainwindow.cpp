@@ -135,6 +135,7 @@ MainWindow::MainWindow(int width, int height, const char* title) {
     glDebugMessageCallback(debugCallbackGL, NULL);
 #endif
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, resizeCallback);
     glfwSetKeyCallback(window, keyCallback);
@@ -150,9 +151,9 @@ void MainWindow::mainLoop() {
     scene.init(width, height);
 
     while (!glfwWindowShouldClose(window)) {
+        scene.fixedStep();
         glfwSwapBuffers(window);
         glfwPollEvents();
-        scene.fixedStep();
     }
 
     glfwDestroyWindow(window);

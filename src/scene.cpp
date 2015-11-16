@@ -36,7 +36,8 @@ void Scene::rightReleased() { rightdown = false; }
 
 void Scene::mouseMoved(float dx, float dy) {
     float dy_rad = - mouse_sensitivity * dx;
-    float dx_rad = mouse_sensitivity * dy;
+    float dx_rad = - mouse_sensitivity * dy;
+    camera.turn(dy_rad, dx_rad);
 }
 
 void Scene::windowChanged(int width, int height) {

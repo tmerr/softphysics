@@ -34,7 +34,7 @@ glm::vec3 Camera::getLocation() {
 
 glm::vec3 Camera::getFacingVector() {
     static const glm::vec3 negunitz(0.f, 0.f, -1.f);
-    return glm::rotateX(glm::rotateY(negunitz, y_rad), x_rad);
+    return glm::rotateY(glm::rotateX(negunitz, x_rad), y_rad);
 }
 
 glm::mat4 Camera::getWorldToClip() {

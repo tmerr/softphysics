@@ -63,7 +63,7 @@ private:
 
     const float dtfixed = 1.f/60.f;
     const float move_speed = 2.f; // meters per second
-    const float mouse_sensitivity = 0.02f; // radians per pixel
+    const float mouse_sensitivity = 0.001f; // radians per pixel
 };
 
 #endif
