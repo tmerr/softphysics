@@ -1,4 +1,3 @@
-# Soft Physics (OpenGL) #
-#### By: tmerr####
+# Soft Physics #
 
-Creating softbody physics in c++ using OpenGL.
+A work in progress implementation of soft body dynamics using C++ and OpenGL.
