@@ -9,14 +9,15 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
-#include <iostream>
+#include <sstream>
 #include <exception>
 
-class ShaderError : public std::exception {
-  virtual const char* what() const throw() {
-    return "error setting up the shaders";
-  }
-} shader_error;
+class ShaderError : public std::runtime_error {
+public:
+  ShaderError(const std::string& msg)
+      : std::runtime_error(msg)
+  {}
+};
 
 GLuint compileShader(std::string path, GLenum shader_type) {
     // read in the shader source code
@@ -26,8 +27,7 @@ GLuint compileShader(std::string path, GLenum shader_type) {
         source_string = std::string((std::istreambuf_iterator<char>(file)),
                                      std::istreambuf_iterator<char>());
     } catch(std::ifstream::failure e) {
-        std::cerr << e.what() << std::endl;
-        throw shader_error;
+        throw ShaderError("error with \"" + path + "\". couldn't read file. exception: " + e.what());
     }
 
     // create and compile the shader
@@ -35,8 +35,7 @@ GLuint compileShader(std::string path, GLenum shader_type) {
     int length = source_string.size();
     GLuint shader = glCreateShader(shader_type);
     if (shader == 0) {
-        std::cerr << "failed to create shader";
-        throw shader_error;
+        throw ShaderError("error with \"" + path + "\". glCreateShader returned 0.");
     }
     glShaderSource(shader, 1, &source, &length);
     glCompileShader(shader);
@@ -49,16 +48,19 @@ GLuint compileShader(std::string path, GLenum shader_type) {
         GLint loglength;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &loglength);
 
-        std::cerr << "failed to compile shader at \"" << path << "\"." << std::endl;
+        std::stringstream errmsg;
+        errmsg << "error with \"" << path << "\". gl could not compile the shader. ";
 
         if (loglength > 1) {
             std::vector<GLchar> log(loglength);
             glGetShaderInfoLog(shader, loglength, &loglength, &log[0]);
-            std::cerr << "info log: " << &log[0] << std::endl;
+            errmsg << "info log: " << &log[0];
+        } else {
+            errmsg << "there is no associated log.";
         }
 
         glDeleteShader(shader);
-        throw shader_error;
+        throw ShaderError(errmsg.str());
     }
 
     return shader;
@@ -82,19 +84,22 @@ GLuint compileSolidShader() {
     glGetProgramiv(program, GL_LINK_STATUS, &status);
     if(status == GL_FALSE)
     {
+        std::stringstream errmsg;
+        errmsg << "failed to link shader program for solid material. ";
+
         GLint loglength;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &loglength);
-        std::vector<GLchar> log(loglength);
-        glGetProgramInfoLog(program, loglength, &loglength, &log[0]);
-        std::cerr << "failed to link shader program for solid material." << std::endl;
-        for (auto &ch : log) {
-            std::cerr << ch;
+        if (loglength > 1) {
+            std::vector<GLchar> log(loglength);
+            glGetProgramInfoLog(program, loglength, &loglength, &log[0]);
+            errmsg << "info log: " << &log[0];
+        } else {
+            errmsg << "there is no associated log.";
         }
-        std::cerr << std::endl;
         glDeleteProgram(program);
         glDeleteShader(vert);
         glDeleteShader(frag);
-        throw shader_error;
+        throw ShaderError(errmsg.str());
     }
 
     glDetachShader(program, vert);
@@ -175,16 +180,14 @@ void Renderer::render(const std::vector<SimObject> &objects, glm::mat4 worldtocl
     // set the world to clip matrix uniform
     GLint matrix_uniform = glGetUniformLocation(solid_program, "worldtoclip");
     if (matrix_uniform == -1) {
-        std::cerr << "couldn't find uniform variable worldtoclip" << std::endl;
-        throw shader_error;
+        throw ShaderError("couldn't get uniform variable worldtoclip");
     }
     glUniformMatrix4fv(matrix_uniform, 1, GL_FALSE, glm::value_ptr(worldtoclip));
 
     // get the color uniform that will be changed with each simulation object
     GLint color_uniform = glGetUniformLocation(solid_program, "input_color");
     if (color_uniform == -1) {
-        std::cerr << "couldn't find uniform variable input_color" << std::endl;
-        throw shader_error;
+        throw ShaderError("couldn't get uniform variable input_color");
     }
 
     // make + draw buffers
