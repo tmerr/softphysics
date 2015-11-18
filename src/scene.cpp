@@ -1,7 +1,11 @@
 #include "scene.hpp"
 #include <glm/vec3.hpp>
 
-Scene::Scene() : camera(glm::vec3(0.f), 0.f, 0.f, 1.f) {
+Scene::Scene(int winwidth, int winheight)
+    : camera(glm::vec3(0.f), 0.f, 0.f, 1.f),
+      window(winwidth, winheight, "simulation"),
+      renderer(winwidth, winheight)
+{
     // triangle body
     StaticBody body;
     body.points.push_back(glm::vec3(-1.f, -0.5f, -3.f));
@@ -18,51 +22,43 @@ Scene::Scene() : camera(glm::vec3(0.f), 0.f, 0.f, 1.f) {
     // triangle final object
     SimObject simobject = { body, material };
     simobjects.push_back(simobject);
+
+    window.setMouseMoveCallback([this](float dx, float dy) {
+        float dy_rad = - mouse_sensitivity * dx;
+        float dx_rad = - mouse_sensitivity * dy;
+        camera.turn(dy_rad, dx_rad);
+    });
+
+    window.setResizeCallback([this](int width, int height) {
+        camera.setAspect((float)width / (float)height);
+        renderer.windowChanged(width, height);
+    });
+
+    camera.setAspect(winwidth/(float)winheight);
 }
 
-void Scene::init(int width, int height) {
-    camera.setAspect((float)width/(float)height);
-    renderer.init(width, height);
-}
+void Scene::mainLoop() {
+    static const float dt = 1.f / 60.f;
 
-void Scene::forwardPressed() { forwarddown = true; }
-void Scene::forwardReleased() { forwarddown = false; }
-void Scene::backPressed() { backdown = true; }
-void Scene::backReleased() { backdown = false; }
-void Scene::leftPressed() { leftdown = true; }
-void Scene::leftReleased() { leftdown = false; }
-void Scene::rightPressed() { rightdown = true;}
-void Scene::rightReleased() { rightdown = false; }
+    while (!window.shouldClose()) {
+        physics.step(simobjects, dt);
 
-void Scene::mouseMoved(float dx, float dy) {
-    float dy_rad = - mouse_sensitivity * dx;
-    float dx_rad = - mouse_sensitivity * dy;
-    camera.turn(dy_rad, dx_rad);
-}
+        if (window.checkUp()) {
+            camera.forward(move_speed * dt);
+        }
+        if (window.checkDown()) {
+            camera.forward(-move_speed * dt);
+        }
+        if (window.checkLeft()) {
+            camera.strafe(-move_speed * dt);
+        }
+        if (window.checkRight()) {
+            camera.strafe(move_speed * dt);
+        }
 
-void Scene::windowChanged(int width, int height) {
-    camera.setAspect((float)width / (float)height);
-    renderer.windowChanged(width, height);
-}
+        renderer.render(simobjects, camera.getWorldToClip());
 
-void Scene::step(float dt) {
-    physics.step(simobjects, dt);
-
-    if (forwarddown) {
-        camera.forward(move_speed * dt);
+        window.pollEvents();
+        window.swapBuffers();
     }
-    if (backdown) {
-        camera.forward(-move_speed * dt);
-    }
-    if (leftdown) {
-        camera.strafe(-move_speed * dt);
-    }
-    if (rightdown) {
-        camera.strafe(move_speed * dt);
-    }
-    renderer.render(simobjects, camera.getWorldToClip());
-}
-
-void Scene::fixedStep() {
-    step(dtfixed);
 }

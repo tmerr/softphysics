@@ -1,7 +1,7 @@
-#include "mainwindow.hpp"
+#include "scene.hpp"
 
 int main() {
-    MainWindow win(640, 480, "physics simulation");
-    win.mainLoop();
+    Scene scene(640, 480);
+    scene.mainLoop();
     return 0;
 }

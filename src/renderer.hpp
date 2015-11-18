@@ -8,8 +8,8 @@
 
 class Renderer {
 public:
+    Renderer(int width, int height);
     ~Renderer();
-    void init(int width, int height);
     void windowChanged(int width, int height);
     void render(const std::vector<SimObject> &objects, glm::mat4 worldtoclip);
 private:

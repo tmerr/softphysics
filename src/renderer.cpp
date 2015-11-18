@@ -108,9 +108,8 @@ GLuint compileSolidShader() {
     return program;
 }
 
-
-void Renderer::init(int width, int height) {
-    glViewport(0.f, 0.f, (float)width, (float)height);
+Renderer::Renderer(int viewportWidth, int viewportHeight) {
+    glViewport(0.f, 0.f, (float)viewportWidth, (float)viewportHeight);
     solid_program = compileSolidShader();
 }
 

@@ -1,6 +1,12 @@
 #include "mainwindow.hpp"
+
+// glad must be included before glfw.
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <iostream>
 #include <exception>
+
 
 class WindowCreationError : public std::runtime_error {
 public:
@@ -31,60 +37,27 @@ static void error_callback(int error, const char* description) {
 }
 
 void MainWindow::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    MainWindow *win = static_cast<MainWindow*>(glfwGetWindowUserPointer(window));
-
-    switch (key) {
-        case GLFW_KEY_ESCAPE:
-            if (action == GLFW_PRESS) {
-                glfwSetWindowShouldClose(window, GL_TRUE);
-            }
-            break;
-        case GLFW_KEY_W:
-            if (action == GLFW_PRESS) {
-                win->scene.forwardPressed();
-            } else if (action == GLFW_RELEASE) {
-                win->scene.forwardReleased();
-            }
-            break;
-        case GLFW_KEY_A:
-            if (action == GLFW_PRESS) {
-                win->scene.leftPressed();
-            } else if (action == GLFW_RELEASE) {
-                win->scene.leftReleased();
-            }
-            break;
-        case GLFW_KEY_S:
-            if (action == GLFW_PRESS) {
-                win->scene.backPressed();
-            } else if (action == GLFW_RELEASE) {
-                win->scene.backReleased();
-            }
-            break;
-        case GLFW_KEY_D:
-            if (action == GLFW_PRESS) {
-                win->scene.rightPressed();
-            } else if (action == GLFW_RELEASE) {
-                win->scene.rightReleased();
-            }
-            break;
+    if (key == GLFW_KEY_ESCAPE) {
+        glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }
 
-void MainWindow::mouseCallback(GLFWwindow* window, double xpos, double ypos) {
+void MainWindow::mouseCallbackGlfw(GLFWwindow* window, double xpos, double ypos) {
     MainWindow *win = static_cast<MainWindow*>(glfwGetWindowUserPointer(window));
     if (win->mouse_havelast) {
-        float deltax = (float)(xpos - win->mouse_lastx);
-        float deltay = (float)(ypos - win->mouse_lasty);
-        win->scene.mouseMoved(deltax, deltay);
+        glfwGetCursorPos(window, &xpos, &ypos);
+        float dx = (float)(xpos - win->mouse_lastx);
+        float dy = (float)(ypos - win->mouse_lasty);
+        win->mouseCallback(dx, dy);
     }
     win->mouse_lastx = xpos;
     win->mouse_lasty = ypos;
     win->mouse_havelast = true;
 }
 
-void MainWindow::resizeCallback(GLFWwindow* window, int width, int height) {
+void MainWindow::resizeCallbackGlfw(GLFWwindow* window, int width, int height) {
     MainWindow *win = static_cast<MainWindow*>(glfwGetWindowUserPointer(window));
-    win->scene.windowChanged(width, height);
+    win->resizeCallback(width, height);
 }
 
 MainWindow::MainWindow(int width, int height, const char* title) {
@@ -137,25 +110,57 @@ MainWindow::MainWindow(int width, int height, const char* title) {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetWindowUserPointer(window, this);
-    glfwSetFramebufferSizeCallback(window, resizeCallback);
     glfwSetKeyCallback(window, keyCallback);
-    glfwSetCursorPosCallback(window, mouseCallback);
+    glfwSetFramebufferSizeCallback(window, resizeCallbackGlfw);
+    glfwSetCursorPosCallback(window, mouseCallbackGlfw);
 
-    glfwSwapInterval(1); // enables vsync
+    // enables vsync.
+    glfwSwapInterval(1);
+
+    // the default resize callback does nothing.
+    resizeCallback = [](int w, int h) {};
 }
 
-void MainWindow::mainLoop() {
-    int width;
-    int height;
-    glfwGetWindowSize(window, &width, &height);
-    scene.init(width, height);
+void MainWindow::deltaMouse(float* dx, float* dy) {
+}
 
-    while (!glfwWindowShouldClose(window)) {
-        scene.fixedStep();
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+bool MainWindow::checkLeft() {
+    return glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
+}
 
+bool MainWindow::checkRight() {
+    return glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+}
+
+bool MainWindow::checkUp() {
+    return glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
+}
+
+bool MainWindow::checkDown() {
+    return glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
+}
+
+void MainWindow::setMouseMoveCallback(std::function<void(float, float)> callback) {
+    mouseCallback = callback;
+}
+
+void MainWindow::setResizeCallback(std::function<void(int, int)> callback) {
+    resizeCallback = callback;
+}
+
+void MainWindow::pollEvents() {
+    glfwPollEvents();
+}
+
+void MainWindow::swapBuffers() {
+    glfwSwapBuffers(window);
+}
+
+bool MainWindow::shouldClose() {
+    return glfwWindowShouldClose(window);
+}
+
+MainWindow::~MainWindow() {
     glfwDestroyWindow(window);
     glfwTerminate();
 }
