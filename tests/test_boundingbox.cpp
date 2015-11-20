@@ -1,4 +1,5 @@
 #include "boundingbox.hpp"
+#include <boost/test/included/unit_test.hpp>
 #include <glm/glm.hpp>
 #include <vector>
 

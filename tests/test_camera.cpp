@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include <boost/test/included/unit_test.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 

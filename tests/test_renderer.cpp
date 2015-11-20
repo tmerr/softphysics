@@ -1,7 +1,7 @@
 #include "renderer.hpp"
-#include <GL/glew.h>
+#include <boost/test/included/unit_test.hpp>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <vector>
 #include <iostream>
 
 void error_callback(int error, const char* description)
@@ -13,15 +13,18 @@ void error_callback(int error, const char* description)
 BOOST_AUTO_TEST_CASE(renderer_init) {
     BOOST_CHECK(glfwInit());
     glfwSetErrorCallback(error_callback);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     GLFWwindow* window = glfwCreateWindow(640, 480, "TestWindow", NULL, NULL);
     if (!window) {
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
     glfwMakeContextCurrent(window);
-    BOOST_CHECK_EQUAL(glewInit(), GLEW_OK); // important
-    Renderer renderer;
-    BOOST_CHECK_NO_THROW(renderer.init(640, 480));
+    BOOST_CHECK(gladLoadGL());
+    Renderer renderer(640, 480);
     glfwDestroyWindow(window);
     glfwTerminate();
 }
