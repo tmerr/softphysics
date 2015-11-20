@@ -10,6 +10,7 @@ struct BoundingBox {
 
     static BoundingBox ofPoints(const std::vector<glm::vec3> &points);
     bool contains(const glm::vec3 p);
+    bool intersects(const BoundingBox &other);
 };
 
 #endif

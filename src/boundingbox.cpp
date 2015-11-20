@@ -1,4 +1,5 @@
 #include "boundingbox.hpp"
+#include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 #include <algorithm>
 #include <limits>
@@ -28,4 +29,10 @@ bool BoundingBox::contains(const glm::vec3 p) {
     return p0.x <= p.x && p.x < p1.x &&
            p0.y <= p.y && p.y < p1.y &&
            p0.z <= p.z && p.z < p1.z;
+}
+
+bool BoundingBox::intersects(const BoundingBox & other) {
+    return p0.x < other.p1.x && other.p0.x < p1.x &&
+           p0.y < other.p1.y && other.p0.y < p1.y &&
+           p0.z < other.p1.z && other.p0.z < p1.z;
 }
