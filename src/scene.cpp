@@ -2,7 +2,7 @@
 #include <glm/vec3.hpp>
 
 Scene::Scene(int winwidth, int winheight)
-    : camera(glm::vec3(0.f), 0.f, 0.f, 1.f),
+    : camera(glm::vec3(0.f), 0.f, 0.f, winwidth/(float)winheight),
       window(winwidth, winheight, "simulation"),
       renderer(winwidth, winheight)
 {
@@ -33,8 +33,6 @@ Scene::Scene(int winwidth, int winheight)
         camera.setAspect((float)width / (float)height);
         renderer.windowChanged(width, height);
     });
-
-    camera.setAspect(winwidth/(float)winheight);
 }
 
 void Scene::mainLoop() {
