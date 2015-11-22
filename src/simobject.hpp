@@ -13,7 +13,7 @@
 struct StaticBody {
     std::vector<glm::vec3> points;
     std::vector<std::array<unsigned int, 3> > faces;
-    BoundingBox boundingbox;
+    BoundingBox boundingbox; // update when points are changed.
 };
 
 struct Spring {
@@ -30,6 +30,7 @@ struct SoftBody {
     std::vector<glm::vec3> velocities_backbuffer;
     std::vector<std::array<unsigned int, 3> > faces;
     std::vector<Spring> springs;
+    BoundingBox boundingbox;
 };
 
 // materials

@@ -4,3 +4,4 @@
 #include "test_boundingbox.cpp"
 #include "test_camera.cpp"
 #include "test_renderer.cpp"
+#include "test_physicsfuncs.cpp"
