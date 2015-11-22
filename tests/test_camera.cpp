@@ -1,23 +1,8 @@
 #include "camera.hpp"
+#include "approxequal.hpp"
 #include <boost/test/included/unit_test.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-
-static const float epsilon = 0.000001f;
-
-bool approxEqual(float f1, float f2) {
-    return glm::abs(f2 - f1) < epsilon;
-}
-
-bool approxEqual(const glm::vec3 &v1, const glm::vec3 &v2) {
-    glm::vec3 delta = glm::abs(v2 - v1);
-    return delta.x < epsilon && delta.y < epsilon && delta.z < epsilon;
-}
-
-bool approxEqual(const glm::vec4 &v1, const glm::vec4 &v2) {
-    glm::vec4 delta = glm::abs(v2 - v1);
-    return delta.x < epsilon && delta.y < epsilon && delta.z < epsilon && delta.w < epsilon;
-}
 
 BOOST_AUTO_TEST_CASE(camera_faces_negz) {
     Camera c(glm::vec3(0.f, 0.f, 0.f), 0.f, 0.f, 1.f);

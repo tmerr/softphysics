@@ -7,6 +7,7 @@
 #include <glm/vec3.hpp>
 #include <boost/variant.hpp>
 
+namespace physicsfuncs {
 
 // this function returns whether a ray intersects a triangle.
 // the ray is defined by p + t*d.
@@ -16,10 +17,10 @@
 // of how it works:
 // http://www.lighthouse3d.com/tutorials/maths/ray-triangle-intersection/ 
 //
-// if this function returns true, it also says where, at u*v0 + v*v1 + w*v2.
-// you can find w because u + v + w = 1.
+// if this function returns true, it also says where, at a*v0 + b*v1 + c*v2.
+// you can find w because a + b + c = 1.
 bool rayIntersectsTriangle(glm::vec3 p, glm::vec3 d, glm::vec3 v0, glm::vec3 v1, glm::vec3 v2,
-                           float* u, float* v) {
+                           float* b, float* c) {
     glm::vec3 e1 = v1 - v0;
     glm::vec3 e2 = v2 - v0;
 
@@ -31,15 +32,15 @@ bool rayIntersectsTriangle(glm::vec3 p, glm::vec3 d, glm::vec3 v0, glm::vec3 v1,
 
     float f = 1.f/a;
     glm::vec3 s = p - v0;
-    *u = f * glm::dot(s, h);
+    *b = f * glm::dot(s, h);
 
-    if (*u < 0.f || *u > 1.f)
+    if (*b < 0.f || *b > 1.f)
         return false;
 
     glm::vec3 q = glm::cross(s, e1);
-    *v = f * glm::dot(d, q);
+    *c = f * glm::dot(d, q);
 
-    if (*v < 0.f || *u + *v > 1.f)
+    if (*c < 0.f || *b + *c > 1.f)
         return false;
 
     // at this stage we can compute t to find out where
@@ -104,23 +105,6 @@ public:
     }
 };
 
-typedef size_t PointPenetration;
-
-// gets which face in object2 was penetrated.
-//
-// also, the location of the face penetration is
-// u*v1 + v*v2 + w*v3
-// where u + v + w = 1
-// (so you have the info to calculate w)
-struct FacePenetration {
-    size_t which;
-
-    float u;
-    float v;
-};
-
-typedef boost::variant<PointPenetration, FacePenetration> Penetration;
-
 // quick collision check
 // returns true if the two objects can collide and their AABBs intersect
 bool broadphase(const SimObject & object1,
@@ -161,4 +145,6 @@ std::vector<glm::vec3> mutateForces(const SimObject & object1,
                                     const SimObject & object2,
                                     std::vector<Penetration> penetrations) {
     // TODO all the things
+}
+
 }

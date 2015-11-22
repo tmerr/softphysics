@@ -5,12 +5,23 @@
 #include <boost/variant.hpp>
 #include <vector>
 #include <cstddef>
+#include <glm/vec3.hpp>
 
 
 namespace physicsfuncs {
 
+bool rayIntersectsTriangle(glm::vec3 p, glm::vec3 d,
+                           glm::vec3 v0, glm::vec3 v1, glm::vec3 v2,
+                           float* u, float* v);
+
 typedef size_t PointPenetration;
 
+// gets which face in object2 was penetrated.
+//
+// the location point of the face penetration is at
+// u*v1 + v*v2 + w*v3
+// where u + v + w = 1
+// (so you have the info to calculate w)
 struct FacePenetration {
     size_t which;
 
