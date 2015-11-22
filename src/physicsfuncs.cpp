@@ -23,35 +23,35 @@ bool rayIntersectsTriangle(glm::vec3 p, glm::vec3 d, glm::vec3 v0, glm::vec3 v1,
     glm::vec3 e2 = v2 - v0;
 
     glm::vec3 h = glm::cross(d, e2);
-	float a = glm::dot(e1, h);
+    float a = glm::dot(e1, h);
 
-	if (a > -0.00001 && a < 0.00001)
-		return false;
+    if (a > -0.00001 && a < 0.00001)
+        return false;
 
-	float f = 1.f/a;
+    float f = 1.f/a;
     glm::vec3 s = p - v0;
     *u = f * glm::dot(s, h);
 
-	if (*u < 0.f || *u > 1.f)
-		return false;
+    if (*u < 0.f || *u > 1.f)
+        return false;
 
     glm::vec3 q = glm::cross(s, e1);
     *v = f * glm::dot(d, q);
 
-	if (*v < 0.f || *u + *v > 1.f)
-		return false;
+    if (*v < 0.f || *u + *v > 1.f)
+        return false;
 
-	// at this stage we can compute t to find out where
-	// the intersection point is on the line
+    // at this stage we can compute t to find out where
+    // the intersection point is on the line
 
-	float t = f * glm::dot(e2, q);
+    float t = f * glm::dot(e2, q);
 
-	if (t > 0.00001) // ray intersection
-		return true;
+    if (t > 0.00001) // ray intersection
+        return true;
 
-	else // this means that there is a line intersection
-		 // but not a ray intersection
-		 return false;
+    else // this means that there is a line intersection
+         // but not a ray intersection
+         return false;
 }
 
 // gets the bounding box of a simulation object body
