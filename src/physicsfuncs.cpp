@@ -1,6 +1,7 @@
 // mainly pure functions for physics.
-#include <boundingbox.hpp>
-#include <simobject.hpp>
+#include "physicsfuncs.hpp"
+#include "boundingbox.hpp"
+#include "simobject.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/vec3.hpp>
