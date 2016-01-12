@@ -18,7 +18,7 @@ namespace physicsfuncs {
 // http://www.lighthouse3d.com/tutorials/maths/ray-triangle-intersection/ 
 //
 // if this function returns true, it also says where, at a*v0 + b*v1 + c*v2.
-// you can find w because a + b + c = 1.
+// you can find a because a + b + c = 1.
 bool rayIntersectsTriangle(glm::vec3 p, glm::vec3 d, glm::vec3 v0, glm::vec3 v1, glm::vec3 v2,
                            float* b, float* c) {
     glm::vec3 e1 = v1 - v0;
