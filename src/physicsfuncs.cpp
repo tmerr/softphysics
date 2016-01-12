@@ -97,11 +97,11 @@ class CanCollide
     : public boost::static_visitor<bool> {
 public:
     bool operator()(const StaticBody &, const StaticBody &) const {
-        return true;
+        return false;
     }
     template <typename T, typename U>
     bool operator()(const T &, const U &) const {
-        return false;
+        return true;
     }
 };
 
